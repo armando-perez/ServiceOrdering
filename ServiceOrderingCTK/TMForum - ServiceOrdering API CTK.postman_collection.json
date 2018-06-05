@@ -1,0 +1,1480 @@
+{
+	"info": {
+		"name": "TMForum - ServiceOrdering API CTK",
+		"_postman_id": "1126ab43-3f3d-45fc-878a-eb6bf0f56477",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "TC_ServiceOrder_N1 – Create new ServiceOrder with minimum required information",
+			"description": null,
+			"item": [
+				{
+					"name": "serviceOrder/",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6fbc849f-fc86-4931-a41d-0d45be8fd6e1",
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 201\"] = responseCode.code === 201;",
+									"if (responseCode.code < 400){",
+									"// DATA",
+									"var receivedData = JSON.parse(responseBody);",
+									"var id = receivedData.id;",
+									"var sentData = JSON.parse(request.data);",
+									"var requiredFields = [\"id\",\"href\",\"state\",\"orderDate\",\"orderItem\"];",
+									"var requiredOrderFields = [\"id\", \"action\", \"state\"]",
+									"//var requiredFields = [\"id\",\"href\",\"state\",\"orderDate\"];",
+									"",
+									"//TESTS",
+									"tests[\"Content-Type is present \" + postman.getResponseHeader(\"Content-type\")] = postman.getResponseHeader(\"Content-type\")",
+									"tests[\"Response contains ID\"] = findFieldInBody('id',receivedData);",
+									"tests[\"Response contains all required fields\"] = findFieldsInBody(requiredFields,receivedData) && findFieldsInBody(requiredOrderFields, receivedData.orderItem);",
+									"tests[\"Location header is correct\"] = responseHeaders.hasOwnProperty(\"Location\") ",
+									"    && (postman.getResponseHeader(\"Location\").toString() == \"/docs/serviceOrder/\"+id || //relative",
+									"    postman.getResponseHeader(\"Location\").toString() == getUrlFromEnvironment('{{serviceOrderingApi}}') + \"/docs/serviceOrder/\"+id);   //absolute",
+									"tests[\"POST Body Response equals Request Body\"] = objectEquals(sentData, receivedData);",
+									"",
+									"//PREPARATION FOR FOLLOWING TESTS",
+									"postman.setGlobalVariable(\"serviceOrderingId\", receivedData.id.toString());",
+									"postman.setGlobalVariable(\"serviceOrderingRequest\", request.data);",
+									"}",
+									"",
+									"//HELPING FUNCTIONS",
+									"/* testing for equality v2 may have more properties than v1 but not less */",
+									"function objectEquals(v1, v2) {",
+									"    if (typeof(v1) === \"function\") {",
+									"        return v1.toString() === v2.toString();",
+									"    }",
+									"    else if (v1 instanceof Object && v2 instanceof Object) {",
+									"        var r = true;",
+									"        for (var k in v1) {",
+									"            r = objectEquals(v1[k], v2[k]);",
+									"            if (!r) {",
+									"                //tests[\"property \" + k.toString() + \"==>\" + v1[k] + \"!=\" + v2[k]] = false;",
+									"                //tests[\"type1 \" + typeof(v1[k]) + \" type2 \" + typeof(v2[k])] = false;",
+									"                return false;",
+									"            }",
+									"        }",
+									"        return true;",
+									"    }",
+									"    else return v1 === v2;",
+									"}",
+									"",
+									"function getUrlFromEnvironment(url){",
+									"    if (url.indexOf('{{') >= 0){",
+									"        part1 = url.substring(0,url.indexOf('{{'));",
+									"        part2 = url.substring(url.indexOf('{{')+2,url.indexOf('}}'));",
+									"        part3 = url.substring(url.indexOf('}}')+2,url.length);",
+									"        return getUrlFromEnvironment(part1) + getUrlFromEnvironment(environment[part2]) + getUrlFromEnvironment(part3);",
+									"    }",
+									"    else return url;",
+									"}",
+									"",
+									"function findFieldInBody(field,body){",
+									"    for (var key in body){",
+									"        /*if (key == \"orderItem\") {",
+									"            return findFieldsInBody(fields,body)",
+									"        }*/",
+									"        if (key == field)",
+									"            return true;",
+									"    }",
+									"    return false;",
+									"}",
+									"",
+									"function findFieldsInBody(fields,body){",
+									"    if (Object.prototype.toString.call(body) === '[object Array]'){",
+									"        for (var i = 0; i < body.length; i++){",
+									"            findFieldsInBody(fields,body[i]);",
+									"        }",
+									"    }",
+									"    else for (var k = 0; k < fields.length; k++){",
+									"        if (!findFieldInBody(fields[k],body)){",
+									"            tests[\"An element is missing the field \" + fields[k]] = false;",
+									"            return false;",
+									"        }",
+									"    }",
+									"    return true;",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"externalId\": \"OrangeBSS748\",\n\"priority\": \"1\",\n\"description\": \"Service order description\",\n\"category\": \"CloudServiceOrdering\",\n\"requestedStartDate\": \"2018-01-15T09:37:40.508Z\",\n\"requestedCompletionDate\": \"2018-01-15T09:37:40.508Z\",\n\"@type\": \"standard\",\n\"orderItem\": [\n{\n\"id\": \"1\",\n\"action\": \"add\",\n\"@type\": \"standard\",\n\"service\": {\n\"serviceState\": \"Active\",\n\"serviceCharacteristic\": [\n{\n\"name\": \"vCPE_IP\",\n\"valueType\": \"String\",\n\"value\": {\n\"@type\": \"IPAddress\",\n\"@schemaLocation\": \"http....\",\n\"vCPE_IP\": \"193.218.236.21\"\n}\n}\n],\n\"serviceSpecification\": {\n\"id\": \"12\",\n\"href\": \"http://...:serviceSpecification/12\",\n\"name\": \"vCPE\",\n\"version\": \"1\",\n\"@type\": \"vCPE\",\n\"@schemaLocation\": \"http...\"\n}\n}\n}\n]\n}"
+						},
+						"url": {
+							"raw": "{{serviceOrderingApi}}/serviceOrder",
+							"host": [
+								"{{serviceOrderingApi}}"
+							],
+							"path": [
+								"serviceOrder"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "serviceOrder/{{serviceOrderId}}",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "004ae1fd-c8ee-4db7-8430-2354cd7e1ac6",
+								"type": "text/javascript",
+								"exec": [
+									"// DATA",
+									"var receivedData = JSON.parse(responseBody);",
+									"var id = postman.getGlobalVariable(\"serviceOrderingId\");",
+									"var lastRequest = JSON.parse(postman.getGlobalVariable(\"serviceOrderingRequest\"));",
+									"var requiredFields = [\"id\",\"href\",\"state\",\"orderDate\",\"orderItem\"];",
+									"var requiredOrderFields = [\"id\", \"action\", \"state\"]",
+									"",
+									"//TESTS",
+									"tests[\"Content-Type is present \" + postman.getResponseHeader(\"Content-type\")] = postman.getResponseHeader(\"Content-type\")",
+									"tests[\"Status code is 200\"] = responseCode.code === 200;",
+									"tests[\"Response contains ID\"] = findFieldInBody('id',receivedData);",
+									"tests[\"Response contains all required fields\"] = findFieldsInBody(requiredFields,receivedData) && findFieldsInBody(requiredOrderFields, receivedData.orderItem);",
+									"tests[\"ID is correct\"] = receivedData.id.toString() == id;",
+									"tests[\"Body Response equals previous creation\"] = objectEquals(lastRequest, receivedData);",
+									"//PREPARATION FOR FOLLOWING TESTS",
+									"",
+									"//HELPING FUNCTIONS",
+									"/* testing for equality v2 may have more properties than v1 but not less */",
+									"function objectEquals(v1, v2) {",
+									"    if (typeof(v1) === \"function\") {",
+									"        return v1.toString() === v2.toString();",
+									"    }",
+									"    else if (v1 instanceof Object && v2 instanceof Object) {",
+									"        var r = true;",
+									"        for (var k in v1) {",
+									"            r = objectEquals(v1[k], v2[k]);",
+									"            if (!r) {",
+									"                //tests[\"property \" + k.toString() + \"==>\" + v1[k] + \"!=\" + v2[k]] = false;",
+									"                //tests[\"type1 \" + typeof(v1[k]) + \" type2 \" + typeof(v2[k])] = false;",
+									"                return false;",
+									"            }",
+									"        }",
+									"        return true;",
+									"    }",
+									"    else return v1 === v2;",
+									"}",
+									"",
+									"function getUrlFromEnvironment(url){",
+									"    if (url.indexOf('{{') >= 0){",
+									"        part1 = url.substring(0,url.indexOf('{{'));",
+									"        part2 = url.substring(url.indexOf('{{')+2,url.indexOf('}}'));",
+									"        part3 = url.substring(url.indexOf('}}')+2,url.length);",
+									"        return getUrlFromEnvironment(part1) + getUrlFromEnvironment(environment[part2]) + getUrlFromEnvironment(part3);",
+									"    }",
+									"    else return url;",
+									"}",
+									"",
+									"function findFieldInBody(field,body){",
+									"    for (var key in body){",
+									"        if (key == field)",
+									"            return true;",
+									"    }",
+									"    return false;",
+									"}",
+									"",
+									"function findFieldsInBody(fields,body){",
+									"    if (Object.prototype.toString.call(body) === '[object Array]'){",
+									"        for (var i = 0; i < body.length; i++){",
+									"            findFieldsInBody(fields,body[i]);",
+									"        }",
+									"    }",
+									"    else for (var k = 0; k < fields.length; k++){",
+									"        if (!findFieldInBody(fields[k],body)){",
+									"            tests[\"An element is missing the field \" + fields[k]] = false;",
+									"            return false;",
+									"        }",
+									"    }",
+									"    return true;",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{serviceOrderingApi}}/serviceOrder/{{serviceOrderingId}}",
+							"host": [
+								"{{serviceOrderingApi}}"
+							],
+							"path": [
+								"serviceOrder",
+								"{{serviceOrderingId}}"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TC_ServiceOrder_N2 – Create new ServiceOrder with minimum set of parameters supported by server",
+			"description": null,
+			"item": [
+				{
+					"name": "serviceOrder/",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b4f1c1b1-760b-4a62-8fea-f7fa108d67ab",
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 201\"] = responseCode.code === 201;",
+									"if (responseCode.code < 400){",
+									"// DATA",
+									"var receivedData = JSON.parse(responseBody);",
+									"var id = receivedData.id;",
+									"var sentData = JSON.parse(request.data);",
+									"var requiredFields = [\"id\",\"href\",\"state\",\"orderDate\",\"orderItem\"];",
+									"var requiredOrderFields = [\"id\", \"action\", \"state\"]",
+									"//var requiredFields = [\"id\",\"href\",\"state\",\"orderDate\"];",
+									"",
+									"//TESTS",
+									"tests[\"Content-Type is present \" + postman.getResponseHeader(\"Content-type\")] = postman.getResponseHeader(\"Content-type\")",
+									"tests[\"Response contains ID\"] = findFieldInBody('id',receivedData);",
+									"tests[\"Response contains all required fields\"] = findFieldsInBody(requiredFields,receivedData) && findFieldsInBody(requiredOrderFields, receivedData.orderItem);",
+									"tests[\"Location header is correct\"] = responseHeaders.hasOwnProperty(\"Location\") ",
+									"    && (postman.getResponseHeader(\"Location\").toString() == \"/docs/serviceOrder/\"+id || //relative",
+									"    postman.getResponseHeader(\"Location\").toString() == getUrlFromEnvironment('{{serviceOrderingApi}}') + \"/docs/serviceOrder/\"+id);   //absolute",
+									"tests[\"POST Body Response equals Request Body\"] = objectEquals(sentData, receivedData);",
+									"",
+									"//PREPARATION FOR FOLLOWING TESTS",
+									"postman.setGlobalVariable(\"serviceOrderingId2\", receivedData.id.toString());",
+									"postman.setGlobalVariable(\"serviceOrderingRequest2\", request.data);",
+									"}",
+									"",
+									"//HELPING FUNCTIONS",
+									"/* testing for equality v2 may have more properties than v1 but not less */",
+									"function objectEquals(v1, v2) {",
+									"    if (typeof(v1) === \"function\") {",
+									"        return v1.toString() === v2.toString();",
+									"    }",
+									"    else if (v1 instanceof Object && v2 instanceof Object) {",
+									"        var r = true;",
+									"        for (var k in v1) {",
+									"            r = objectEquals(v1[k], v2[k]);",
+									"            if (!r) {",
+									"                //tests[\"property \" + k.toString() + \"==>\" + v1[k] + \"!=\" + v2[k]] = false;",
+									"                //tests[\"type1 \" + typeof(v1[k]) + \" type2 \" + typeof(v2[k])] = false;",
+									"                return false;",
+									"            }",
+									"        }",
+									"        return true;",
+									"    }",
+									"    else return v1 === v2;",
+									"}",
+									"",
+									"function getUrlFromEnvironment(url){",
+									"    if (url.indexOf('{{') >= 0){",
+									"        part1 = url.substring(0,url.indexOf('{{'));",
+									"        part2 = url.substring(url.indexOf('{{')+2,url.indexOf('}}'));",
+									"        part3 = url.substring(url.indexOf('}}')+2,url.length);",
+									"        return getUrlFromEnvironment(part1) + getUrlFromEnvironment(environment[part2]) + getUrlFromEnvironment(part3);",
+									"    }",
+									"    else return url;",
+									"}",
+									"",
+									"function findFieldInBody(field,body){",
+									"    for (var key in body){",
+									"        /*if (key == \"orderItem\") {",
+									"            return findFieldsInBody(fields,body)",
+									"        }*/",
+									"        if (key == field)",
+									"            return true;",
+									"    }",
+									"    return false;",
+									"}",
+									"",
+									"function findFieldsInBody(fields,body){",
+									"    if (Object.prototype.toString.call(body) === '[object Array]'){",
+									"        for (var i = 0; i < body.length; i++){",
+									"            findFieldsInBody(fields,body[i]);",
+									"        }",
+									"    }",
+									"    else for (var k = 0; k < fields.length; k++){",
+									"        if (!findFieldInBody(fields[k],body)){",
+									"            tests[\"An element is missing the field \" + fields[k]] = false;",
+									"            return false;",
+									"        }",
+									"    }",
+									"    return true;",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"externalId\": \"OrangeBSS954\",\n\"priority\": \"2\",\n\"description\": \"Service order description\",\n\"category\": \"CloudServiceOrdering\",\n\"requestedStartDate\": \"2018-01-18T09:37:40.508Z\",\n\"requestedCompletionDate\": \"2018-01-19T09:37:40.508Z\",\n\"@type\": \"standard\",\n\"orderItem\": [\n{\n\"id\": \"1\",\n\"action\": \"add\",\n\"@type\": \"standard\",\n\"service\": {\n\"serviceState\": \"Active\",\n\"serviceCharacteristic\": [\n{\n\"name\": \"vCPE_IP\",\n\"valueType\": \"String\",\n\"value\": {\n\"@type\": \"IPAddress\",\n\"@schemaLocation\": \"http....\",\n\"vCPE_IP\": \"193.218.459.78\"\n}\n}\n],\n\"serviceSpecification\": {\n\"id\": \"12\",\n\"href\": \"http://...:serviceSpecification/12\",\n\"name\": \"vCPE\",\n\"version\": \"1\",\n\"@type\": \"vCPE\",\n\"@schemaLocation\": \"http...\"\n}\n}\n}\n]\n}"
+						},
+						"url": {
+							"raw": "{{serviceOrderingApi}}/serviceOrder",
+							"host": [
+								"{{serviceOrderingApi}}"
+							],
+							"path": [
+								"serviceOrder"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "serviceOrder/{{serviceOrderId}}",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "d800bed7-b041-40da-b161-9ee5733b9d68",
+								"type": "text/javascript",
+								"exec": [
+									"// DATA",
+									"var receivedData = JSON.parse(responseBody);",
+									"var id = postman.getGlobalVariable(\"serviceOrderingId2\");",
+									"var lastRequest = JSON.parse(postman.getGlobalVariable(\"serviceOrderingRequest2\"));",
+									"var requiredFields = [\"id\",\"href\",\"state\",\"orderDate\",\"orderItem\"];",
+									"var requiredOrderFields = [\"id\", \"action\", \"state\"]",
+									"",
+									"//TESTS",
+									"tests[\"Content-Type is present \" + postman.getResponseHeader(\"Content-type\")] = postman.getResponseHeader(\"Content-type\")",
+									"tests[\"Status code is 200\"] = responseCode.code === 200;",
+									"tests[\"Response contains ID\"] = findFieldInBody('id',receivedData);",
+									"tests[\"Response contains all required fields\"] = findFieldsInBody(requiredFields,receivedData) && findFieldsInBody(requiredOrderFields, receivedData.orderItem);",
+									"tests[\"ID is correct\"] = receivedData.id.toString() == id;",
+									"tests[\"Body Response equals previous creation\"] = objectEquals(lastRequest, receivedData);",
+									"//PREPARATION FOR FOLLOWING TESTS",
+									"",
+									"//HELPING FUNCTIONS",
+									"/* testing for equality v2 may have more properties than v1 but not less */",
+									"function objectEquals(v1, v2) {",
+									"    if (typeof(v1) === \"function\") {",
+									"        return v1.toString() === v2.toString();",
+									"    }",
+									"    else if (v1 instanceof Object && v2 instanceof Object) {",
+									"        var r = true;",
+									"        for (var k in v1) {",
+									"            r = objectEquals(v1[k], v2[k]);",
+									"            if (!r) {",
+									"                //tests[\"property \" + k.toString() + \"==>\" + v1[k] + \"!=\" + v2[k]] = false;",
+									"                //tests[\"type1 \" + typeof(v1[k]) + \" type2 \" + typeof(v2[k])] = false;",
+									"                return false;",
+									"            }",
+									"        }",
+									"        return true;",
+									"    }",
+									"    else return v1 === v2;",
+									"}",
+									"",
+									"function getUrlFromEnvironment(url){",
+									"    if (url.indexOf('{{') >= 0){",
+									"        part1 = url.substring(0,url.indexOf('{{'));",
+									"        part2 = url.substring(url.indexOf('{{')+2,url.indexOf('}}'));",
+									"        part3 = url.substring(url.indexOf('}}')+2,url.length);",
+									"        return getUrlFromEnvironment(part1) + getUrlFromEnvironment(environment[part2]) + getUrlFromEnvironment(part3);",
+									"    }",
+									"    else return url;",
+									"}",
+									"",
+									"function findFieldInBody(field,body){",
+									"    for (var key in body){",
+									"        if (key == field)",
+									"            return true;",
+									"    }",
+									"    return false;",
+									"}",
+									"",
+									"function findFieldsInBody(fields,body){",
+									"    if (Object.prototype.toString.call(body) === '[object Array]'){",
+									"        for (var i = 0; i < body.length; i++){",
+									"            findFieldsInBody(fields,body[i]);",
+									"        }",
+									"    }",
+									"    else for (var k = 0; k < fields.length; k++){",
+									"        if (!findFieldInBody(fields[k],body)){",
+									"            tests[\"An element is missing the field \" + fields[k]] = false;",
+									"            return false;",
+									"        }",
+									"    }",
+									"    return true;",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{serviceOrderingApi}}/serviceOrder/{{serviceOrderingId2}}",
+							"host": [
+								"{{serviceOrderingApi}}"
+							],
+							"path": [
+								"serviceOrder",
+								"{{serviceOrderingId2}}"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TC_ServiceOrder_N3 – Search for ServiceOrder with specific characteristics",
+			"description": null,
+			"item": [
+				{
+					"name": "serviceOrderServiceOrder?category=CloudServiceOrdering",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "59bcd4b2-3185-4742-a736-60fc146e9480",
+								"type": "text/javascript",
+								"exec": [
+									"// DATA",
+									"var receivedData = JSON.parse(responseBody);",
+									"var id1 = postman.getGlobalVariable(\"serviceOrderingId\");",
+									"var id2 = postman.getGlobalVariable(\"serviceOrderingId2\");",
+									"var request = JSON.parse(postman.getGlobalVariable(\"serviceOrderingRequest\"));",
+									"var requiredFields = [\"id\",\"href\",\"state\",\"orderDate\",\"orderItem\"];",
+									"var requiredOrderFields = [\"id\", \"action\", \"state\"];",
+									"",
+									"//TESTS",
+									"tests[\"Content-Type is present \" + postman.getResponseHeader(\"Content-type\")] = postman.getResponseHeader(\"Content-type\")",
+									"tests[\"Status code is 200\"] = responseCode.code === 200;",
+									"tests[\"Response contains all required fields\"] = findFieldsInBody(requiredFields,receivedData);",
+									"tests[\"Response does not contain created resource 2\"] = findElementInList(id2, receivedData);",
+									"tests[\"Response contains created resource 1\"] = findElementInList(id1, receivedData);",
+									"tests[\"Element contained equals previous creation 1\"] = objectEquals(request, receivedData[getPositionOfElementInList(id1, receivedData)]);",
+									"//PREPARATION FOR FOLLOWING TESTS",
+									"",
+									"",
+									"//HELPING FUNCTIONS",
+									"/* testing for equality v2 may have more properties than v1 but not less */",
+									"function objectEquals(v1, v2) {",
+									"    if (typeof(v1) === \"function\") {",
+									"        return v1.toString() === v2.toString();",
+									"    }",
+									"    else if (v1 instanceof Object && v2 instanceof Object) {",
+									"        var r = true;",
+									"        for (var k in v1) {",
+									"            r = objectEquals(v1[k], v2[k]);",
+									"            if (!r) {",
+									"                //tests[\"property \" + k.toString() + \"==>\" + v1[k] + \"!=\" + v2[k]] = false;",
+									"                //tests[\"type1 \" + typeof(v1[k]) + \" type2 \" + typeof(v2[k])] = false;",
+									"                return false;",
+									"            }",
+									"        }",
+									"        return true;",
+									"    }",
+									"    else return v1 === v2;",
+									"}",
+									"",
+									"function findElementInList(elementId,list){",
+									"    for (var i = 0; i < list.length; i++){",
+									"        if (list[i].id == elementId)",
+									"            return true;",
+									"    }",
+									"    return false;",
+									"}",
+									"",
+									"function getPositionOfElementInList(elementId,list){",
+									"    for (var i = 0; i < list.length; i++){",
+									"        if (list[i].id == elementId)",
+									"            return i;",
+									"    }",
+									"    return -1;",
+									"}",
+									"",
+									"function getUrlFromEnvironment(url){",
+									"    if (url.indexOf('{{') >= 0){",
+									"        part1 = url.substring(0,url.indexOf('{{'));",
+									"        part2 = url.substring(url.indexOf('{{')+2,url.indexOf('}}'));",
+									"        part3 = url.substring(url.indexOf('}}')+2,url.length);",
+									"        return getUrlFromEnvironment(part1) + getUrlFromEnvironment(environment[part2]) + getUrlFromEnvironment(part3);",
+									"    }",
+									"    else return url;",
+									"}",
+									"",
+									"function findFieldInBody(field,body){",
+									"    for (var key in body){",
+									"        if (key == \"orderItem\") {",
+									"            findFieldsInBody(requiredOrderFields, key.orderItem)",
+									"        }",
+									"        if (key == field)",
+									"            return true;",
+									"    }",
+									"    return false;",
+									"}",
+									"",
+									"function findFieldsInBody(fields,body){",
+									"    if (Object.prototype.toString.call(body) === '[object Array]'){",
+									"        for (var i = 0; i < body.length; i++){",
+									"        }",
+									"    }",
+									"    else for (var k = 0; k < fields.length; k++){",
+									"        if (!findFieldInBody(fields[k],body)){",
+									"            tests[\"An element is missing the field \" + fields[k]] = false;",
+									"            return false;",
+									"        }",
+									"    }",
+									"    return true;",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{serviceOrderingApi}}/serviceOrder?category=CloudServiceOrdering",
+							"host": [
+								"{{serviceOrderingApi}}"
+							],
+							"path": [
+								"serviceOrder"
+							],
+							"query": [
+								{
+									"key": "category",
+									"value": "CloudServiceOrdering",
+									"equals": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "serviceOrderServiceOrder?priority=1&category=CloudServiceOrdering",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "8e09ee23-fb7d-4e77-9fff-d6f166f5ef87",
+								"type": "text/javascript",
+								"exec": [
+									"// DATA",
+									"var receivedData = JSON.parse(responseBody);",
+									"var id1 = postman.getGlobalVariable(\"serviceOrderingId\");",
+									"var id2 = postman.getGlobalVariable(\"serviceOrderingId2\");",
+									"var request = JSON.parse(postman.getGlobalVariable(\"serviceOrderingRequest\"));",
+									"var requiredFields = [\"id\",\"href\",\"state\",\"orderDate\",\"orderItem\"];",
+									"var requiredOrderFields = [\"id\", \"action\", \"state\"];",
+									"",
+									"//TESTS",
+									"tests[\"Content-Type is present \" + postman.getResponseHeader(\"Content-type\")] = postman.getResponseHeader(\"Content-type\")",
+									"tests[\"Status code is 200\"] = responseCode.code === 200;",
+									"tests[\"Response contains all required fields\"] = findFieldsInBody(requiredFields,receivedData);",
+									"tests[\"Response does not contain created resource 2\"] = !findElementInList(id2, receivedData);",
+									"tests[\"Response contains created resource 1\"] = findElementInList(id1, receivedData);",
+									"tests[\"Element contained equals previous creation 1\"] = objectEquals(request, receivedData[getPositionOfElementInList(id1, receivedData)]);",
+									"//PREPARATION FOR FOLLOWING TESTS",
+									"",
+									"",
+									"//HELPING FUNCTIONS",
+									"/* testing for equality v2 may have more properties than v1 but not less */",
+									"function objectEquals(v1, v2) {",
+									"    if (typeof(v1) === \"function\") {",
+									"        return v1.toString() === v2.toString();",
+									"    }",
+									"    else if (v1 instanceof Object && v2 instanceof Object) {",
+									"        var r = true;",
+									"        for (var k in v1) {",
+									"            r = objectEquals(v1[k], v2[k]);",
+									"            if (!r) {",
+									"                //tests[\"property \" + k.toString() + \"==>\" + v1[k] + \"!=\" + v2[k]] = false;",
+									"                //tests[\"type1 \" + typeof(v1[k]) + \" type2 \" + typeof(v2[k])] = false;",
+									"                return false;",
+									"            }",
+									"        }",
+									"        return true;",
+									"    }",
+									"    else return v1 === v2;",
+									"}",
+									"",
+									"function findElementInList(elementId,list){",
+									"    for (var i = 0; i < list.length; i++){",
+									"        if (list[i].id == elementId)",
+									"            return true;",
+									"    }",
+									"    return false;",
+									"}",
+									"",
+									"function getPositionOfElementInList(elementId,list){",
+									"    for (var i = 0; i < list.length; i++){",
+									"        if (list[i].id == elementId)",
+									"            return i;",
+									"    }",
+									"    return -1;",
+									"}",
+									"",
+									"function getUrlFromEnvironment(url){",
+									"    if (url.indexOf('{{') >= 0){",
+									"        part1 = url.substring(0,url.indexOf('{{'));",
+									"        part2 = url.substring(url.indexOf('{{')+2,url.indexOf('}}'));",
+									"        part3 = url.substring(url.indexOf('}}')+2,url.length);",
+									"        return getUrlFromEnvironment(part1) + getUrlFromEnvironment(environment[part2]) + getUrlFromEnvironment(part3);",
+									"    }",
+									"    else return url;",
+									"}",
+									"",
+									"function findFieldInBody(field,body){",
+									"    for (var key in body){",
+									"        if (key == \"orderItem\") {",
+									"            findFieldsInBody(requiredOrderFields, key.orderItem)",
+									"        }",
+									"        if (key == field)",
+									"            return true;",
+									"    }",
+									"    return false;",
+									"}",
+									"",
+									"function findFieldsInBody(fields,body){",
+									"    if (Object.prototype.toString.call(body) === '[object Array]'){",
+									"        for (var i = 0; i < body.length; i++){",
+									"        }",
+									"    }",
+									"    else for (var k = 0; k < fields.length; k++){",
+									"        if (!findFieldInBody(fields[k],body)){",
+									"            tests[\"An element is missing the field \" + fields[k]] = false;",
+									"            return false;",
+									"        }",
+									"    }",
+									"    return true;",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{serviceOrderingApi}}/serviceOrder?priority=\"1\"&category=CloudServiceOrdering",
+							"host": [
+								"{{serviceOrderingApi}}"
+							],
+							"path": [
+								"serviceOrder"
+							],
+							"query": [
+								{
+									"key": "priority",
+									"value": "\"1\"",
+									"equals": true
+								},
+								{
+									"key": "category",
+									"value": "CloudServiceOrdering",
+									"equals": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "serviceOrder/serviceOrder?externalId=OrangeBSS954",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "10ced8ae-1ec5-4979-a0c2-61d3622980f6",
+								"type": "text/javascript",
+								"exec": [
+									"// DATA",
+									"var receivedData = JSON.parse(responseBody);",
+									"var id1 = postman.getGlobalVariable(\"serviceOrderingId\");",
+									"var id2 = postman.getGlobalVariable(\"serviceOrderingId2\");",
+									"var request = JSON.parse(postman.getGlobalVariable(\"serviceOrderingRequest2\"));",
+									"var requiredFields = [\"id\",\"href\",\"state\",\"orderDate\",\"orderItem\"];",
+									"var requiredOrderFields = [\"id\", \"action\", \"state\"];",
+									"",
+									"//TESTS",
+									"tests[\"Content-Type is present \" + postman.getResponseHeader(\"Content-type\")] = postman.getResponseHeader(\"Content-type\")",
+									"tests[\"Status code is 200\"] = responseCode.code === 200;",
+									"tests[\"Response contains all required fields\"] = findFieldsInBody(requiredFields,receivedData);",
+									"tests[\"Response does not contain created resource 1\"] = !findElementInList(id1, receivedData);",
+									"tests[\"Response contains created resource 2\"] = findElementInList(id2, receivedData);",
+									"tests[\"Element contained equals previous creation 2\"] = objectEquals(request, receivedData[getPositionOfElementInList(id2, receivedData)]);",
+									"//PREPARATION FOR FOLLOWING TESTS",
+									"",
+									"",
+									"//HELPING FUNCTIONS",
+									"/* testing for equality v2 may have more properties than v1 but not less */",
+									"function objectEquals(v1, v2) {",
+									"    if (typeof(v1) === \"function\") {",
+									"        return v1.toString() === v2.toString();",
+									"    }",
+									"    else if (v1 instanceof Object && v2 instanceof Object) {",
+									"        var r = true;",
+									"        for (var k in v1) {",
+									"            r = objectEquals(v1[k], v2[k]);",
+									"            if (!r) {",
+									"                //tests[\"property \" + k.toString() + \"==>\" + v1[k] + \"!=\" + v2[k]] = false;",
+									"                //tests[\"type1 \" + typeof(v1[k]) + \" type2 \" + typeof(v2[k])] = false;",
+									"                return false;",
+									"            }",
+									"        }",
+									"        return true;",
+									"    }",
+									"    else return v1 === v2;",
+									"}",
+									"",
+									"function findElementInList(elementId,list){",
+									"    for (var i = 0; i < list.length; i++){",
+									"        if (list[i].id == elementId)",
+									"            return true;",
+									"    }",
+									"    return false;",
+									"}",
+									"",
+									"function getPositionOfElementInList(elementId,list){",
+									"    for (var i = 0; i < list.length; i++){",
+									"        if (list[i].id == elementId)",
+									"            return i;",
+									"    }",
+									"    return -1;",
+									"}",
+									"",
+									"function getUrlFromEnvironment(url){",
+									"    if (url.indexOf('{{') >= 0){",
+									"        part1 = url.substring(0,url.indexOf('{{'));",
+									"        part2 = url.substring(url.indexOf('{{')+2,url.indexOf('}}'));",
+									"        part3 = url.substring(url.indexOf('}}')+2,url.length);",
+									"        return getUrlFromEnvironment(part1) + getUrlFromEnvironment(environment[part2]) + getUrlFromEnvironment(part3);",
+									"    }",
+									"    else return url;",
+									"}",
+									"",
+									"function findFieldInBody(field,body){",
+									"    for (var key in body){",
+									"        if (key == \"orderItem\") {",
+									"            findFieldsInBody(requiredOrderFields, key.orderItem)",
+									"        }",
+									"        if (key == field)",
+									"            return true;",
+									"    }",
+									"    return false;",
+									"}",
+									"",
+									"function findFieldsInBody(fields,body){",
+									"    if (Object.prototype.toString.call(body) === '[object Array]'){",
+									"        for (var i = 0; i < body.length; i++){",
+									"        }",
+									"    }",
+									"    else for (var k = 0; k < fields.length; k++){",
+									"        if (!findFieldInBody(fields[k],body)){",
+									"            tests[\"An element is missing the field \" + fields[k]] = false;",
+									"            return false;",
+									"        }",
+									"    }",
+									"    return true;",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{serviceOrderingApi}}/serviceOrder?externalId=OrangeBSS954",
+							"host": [
+								"{{serviceOrderingApi}}"
+							],
+							"path": [
+								"serviceOrder"
+							],
+							"query": [
+								{
+									"key": "externalId",
+									"value": "OrangeBSS954",
+									"equals": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TC_ServiceOrder_N4 – Filtered retrieval of ServiceOrder",
+			"description": null,
+			"item": [
+				{
+					"name": "serviceOrder/ServiceOrder?fields=category,href,externalId,priority,state",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "fa17501d-e77b-4845-b26a-57404fc629a2",
+								"type": "text/javascript",
+								"exec": [
+									"// DATA",
+									"var receivedData = JSON.parse(responseBody);",
+									"var id = postman.getGlobalVariable(\"serviceOrderingId2\");",
+									"var lastRequest = JSON.parse(postman.getGlobalVariable(\"serviceOrderingRequest2\"));",
+									"var queryParams = URLToArray(request.url);",
+									"var fields = queryParams[\"fields\"].split(',');fields.push('id');// ID is always returned",
+									"",
+									"",
+									"//TESTS",
+									"tests[\"Content-Type is present \" + postman.getResponseHeader(\"Content-type\")] = postman.getResponseHeader(\"Content-type\")",
+									"tests[\"Status code is 200\"] = responseCode.code === 200;",
+									"",
+									"//checkFieldsMultiple is a custom fucntion for Service Ordering for handling orderitems",
+									"tests[\"Response only contains chosen fields\"] = checkFieldsMultiple( fields,receivedData);",
+									"tests[\"Element contained equals previous creation\"] = filteredObjectEquals(lastRequest, receivedData);",
+									"",
+									"//PREPARATION FOR FOLLOWING TESTS",
+									"",
+									"",
+									"//HELPING FUNCTIONS",
+									"/* testing for equality v2 may have more properties than v1 but not less */",
+									"function filteredObjectEquals(v1, v2) {",
+									"    if (v1 === undefined || v2 === undefined)",
+									"        return true;",
+									"    else if (typeof(v1) === \"function\") ",
+									"        return v1.toString() === v2.toString();",
+									"    else if (v1 instanceof Object && v2 instanceof Object) {",
+									"        var r = true;",
+									"        for (var k in v1) {",
+									"            r = filteredObjectEquals(v1[k], v2[k]);",
+									"            if (!r) ",
+									"                return false;",
+									"        }",
+									"        return true;",
+									"    }",
+									"    else return v1 === v2;",
+									"}",
+									"",
+									"function checkFieldsMultiple(fields,body){",
+									"    if (Object.prototype.toString.call(body) === '[object Array]'){",
+									"        for (var i = 0; i < body.length; i++){",
+									"            return checkFieldsMultiple(fields,body[i]);",
+									"        }",
+									"    }",
+									"    else for (var key in body) {",
+									"        if (fields.indexOf(key) < 0)",
+									"            return false;",
+									"    }",
+									"",
+									"    return true;",
+									"}",
+									"",
+									"function checkFields(fields,body){",
+									"    for (var key in body)",
+									"        if (fields.indexOf(key) < 0)",
+									"            return false;",
+									"    return true;",
+									"}",
+									"",
+									"function URLToArray(url) {",
+									"    var request = {};",
+									"    var pairs = url.substring(url.indexOf('?') + 1).split('&');",
+									"    for (var i = 0; i < pairs.length; i++) {",
+									"        if(!pairs[i])",
+									"            continue;",
+									"        var pair = pairs[i].split('=');",
+									"        request[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);",
+									"     }",
+									"     return request;",
+									"}",
+									"",
+									"function getUrlFromEnvironment(url){",
+									"    if (url.indexOf('{{') >= 0){",
+									"        part1 = url.substring(0,url.indexOf('{{'));",
+									"        part2 = url.substring(url.indexOf('{{')+2,url.indexOf('}}'));",
+									"        part3 = url.substring(url.indexOf('}}')+2,url.length);",
+									"        return getUrlFromEnvironment(part1) + getUrlFromEnvironment(environment[part2]) + getUrlFromEnvironment(part3);",
+									"    }",
+									"    else return url;",
+									"}",
+									"",
+									"function findFieldInBody(field,body){",
+									"    for (var key in body){",
+									"        /*if (key == \"orderItem\") {",
+									"            console.log(\"YO\");",
+									"            return findFieldsInBody(requiredOrderFields, key.orderItem)",
+									"        }",
+									"        else*/",
+									"        if (key == field)",
+									"            return true;",
+									"    }",
+									"    return false;",
+									"}",
+									"",
+									"function checkFieldsMultiple(fields,body){",
+									"    if (Object.prototype.toString.call(body) === '[object Array]'){",
+									"        for (var i = 0; i < body.length; i++){",
+									"            return checkFields(fields,body[i]);",
+									"        }",
+									"    }",
+									"",
+									"    return true;",
+									"}",
+									"",
+									"function findFieldsInBody(fields,body){",
+									"    if (Object.prototype.toString.call(body) === '[object Array]'){",
+									"        for (var i = 0; i < body.length; i++){",
+									"            findFieldsInBody(fields,body[i]);",
+									"        }",
+									"    }",
+									"    else for (var k = 0; k < fields.length; k++){",
+									"        if (!findFieldInBody(fields[k],body)){",
+									"            tests[\"An element is missing the field \" + fields[k]] = false;",
+									"            return false;",
+									"        }",
+									"    }",
+									"    return true;",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{serviceOrderingApi}}/serviceOrder?fields=id,href,externalId,priority,state",
+							"host": [
+								"{{serviceOrderingApi}}"
+							],
+							"path": [
+								"serviceOrder"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "id,href,externalId,priority,state",
+									"equals": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "serviceOrder/ServiceOrder?fields=id,state,orderItem.id,orderItem.state,orderItem.action",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "c1e00fc8-f518-4fcc-b4ef-e4feeccd7b7b",
+								"type": "text/javascript",
+								"exec": [
+									"// DATA",
+									"var receivedData = JSON.parse(responseBody);",
+									"var id = postman.getGlobalVariable(\"serviceOrderingId\");",
+									"var lastRequest = JSON.parse(postman.getGlobalVariable(\"serviceOrderingRequest\"));",
+									"var queryParams = URLToArray(request.url);",
+									"var fields = queryParams[\"fields\"].split(',');fields.push('id');// ID is always returned",
+									"var requiredFields = [\"id\",\"state\"];",
+									"var requiredOrderFields = [\"id\",\"action\",\"state\",\"asdf\"];",
+									"",
+									"//TESTS",
+									"tests[\"Content-Type is present \" + postman.getResponseHeader(\"Content-type\")] = postman.getResponseHeader(\"Content-type\")",
+									"tests[\"Status code is 200\"] = responseCode.code === 200;",
+									"",
+									"//checkFieldsMultiple is a custom fucntion for Service Ordering for handling orderitems",
+									"tests[\"Response only contains chosen fields\"] = checkFieldsMultiple(fields,receivedData);",
+									"tests[\"Element contained equals previous creation\"] = filteredObjectEquals(lastRequest, receivedData);",
+									"",
+									"//PREPARATION FOR FOLLOWING TESTS",
+									"",
+									"",
+									"//HELPING FUNCTIONS",
+									"/* testing for equality v2 may have more properties than v1 but not less */",
+									"function filteredObjectEquals(v1, v2) {",
+									"    if (v1 === undefined || v2 === undefined)",
+									"        return true;",
+									"    else if (typeof(v1) === \"function\") ",
+									"        return v1.toString() === v2.toString();",
+									"    else if (v1 instanceof Object && v2 instanceof Object) {",
+									"        var r = true;",
+									"        for (var k in v1) {",
+									"            r = filteredObjectEquals(v1[k], v2[k]);",
+									"            if (!r) ",
+									"                return false;",
+									"        }",
+									"        return true;",
+									"    }",
+									"    else return v1 === v2;",
+									"}",
+									"",
+									"function checkFields(fields,body){",
+									"    for (var key in body)",
+									"        if (fields.indexOf(key) < 0)",
+									"            return false;",
+									"    return true;",
+									"}",
+									"",
+									"function URLToArray(url) {",
+									"    var request = {};",
+									"    var pairs = url.substring(url.indexOf('?') + 1).split('&');",
+									"    for (var i = 0; i < pairs.length; i++) {",
+									"        if(!pairs[i])",
+									"            continue;",
+									"        var pair = pairs[i].split('=');",
+									"        request[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);",
+									"     }",
+									"     return request;",
+									"}",
+									"",
+									"function getUrlFromEnvironment(url){",
+									"    if (url.indexOf('{{') >= 0){",
+									"        part1 = url.substring(0,url.indexOf('{{'));",
+									"        part2 = url.substring(url.indexOf('{{')+2,url.indexOf('}}'));",
+									"        part3 = url.substring(url.indexOf('}}')+2,url.length);",
+									"        return getUrlFromEnvironment(part1) + getUrlFromEnvironment(environment[part2]) + getUrlFromEnvironment(part3);",
+									"    }",
+									"    else return url;",
+									"}",
+									"",
+									"function findFieldInBody(field,body){",
+									"    for (var key in body){",
+									"        /*if (key == \"orderItem\") {",
+									"            console.log(\"YO\");",
+									"            return findFieldsInBody(requiredOrderFields, key.orderItem)",
+									"        }",
+									"        else*/",
+									"        if (key == field)",
+									"            return true;",
+									"    }",
+									"    return false;",
+									"}",
+									"",
+									"function checkFieldsMultiple(fields,body){",
+									"    if (Object.prototype.toString.call(body) === '[object Array]'){",
+									"        for (var i = 0; i < body.length; i++){",
+									"            return checkFieldsMultiple(fields,body[i]);",
+									"        }",
+									"    }",
+									"    else for (var key in body) {",
+									"        if (key == \"orderItem\") {",
+									"            if (!checkFieldsMultiple(requiredOrderFields, body.orderItem)){",
+									"                console.log(JSON.stringify(body.orderItem))",
+									"                return false ",
+									"            }",
+									"        }",
+									"        else if (fields.indexOf(key) < 0)",
+									"            return false;",
+									"    }",
+									"",
+									"    return true;",
+									"}",
+									"",
+									"function findFieldsInBody(fields,body){",
+									"    if (Object.prototype.toString.call(body) === '[object Array]'){",
+									"        for (var i = 0; i < body.length; i++){",
+									"            findFieldsInBody(fields,body[i]);",
+									"        }",
+									"    }",
+									"    else for (var k = 0; k < fields.length; k++){",
+									"        if (!findFieldInBody(fields[k],body)){",
+									"            tests[\"An element is missing the field \" + fields[k]] = false;",
+									"            return false;",
+									"        }",
+									"    }",
+									"    return true;",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{serviceOrderingApi}}/serviceOrder?fields=id,state,orderItem.id,orderItem.state,orderItem.action",
+							"host": [
+								"{{serviceOrderingApi}}"
+							],
+							"path": [
+								"serviceOrder"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "id,state,orderItem.id,orderItem.state,orderItem.action",
+									"equals": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TC_ServiceOrder_N5 – Filtered Search and Filtered data response",
+			"description": null,
+			"item": [
+				{
+					"name": "serviceOrder/ServiceOrder?externalId=OrangeBSS748&fields=id,state,category,description",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "156a94f7-104d-4800-ae83-104145fe02fe",
+								"type": "text/javascript",
+								"exec": [
+									"// DATA",
+									"var receivedData = JSON.parse(responseBody);",
+									"var id = postman.getGlobalVariable(\"serviceOrderingId\");",
+									"var id2 = postman.getGlobalVariable(\"serviceOrderingId2\");",
+									"var lastRequest = JSON.parse(postman.getGlobalVariable(\"serviceOrderingRequest\"));",
+									"var queryParams = URLToArray(request.url);",
+									"var fields = queryParams[\"fields\"].split(',');fields.push('id');// ID is always returned",
+									"",
+									"//TESTS",
+									"tests[\"Content-Type is present \" + postman.getResponseHeader(\"Content-type\")] = postman.getResponseHeader(\"Content-type\")",
+									"tests[\"Status code is 200\"] = responseCode.code === 200;",
+									"tests[\"Response contains created resource 1\"] = findElementInList(id, receivedData);",
+									"tests[\"Element contained equals previous creation\"] = filteredObjectEquals(lastRequest, receivedData[getPositionOfElementInList(id, receivedData)]);",
+									"tests[\"Response does not contain created resource 2\"] = !findElementInList(id2, receivedData);",
+									"//checkFieldsMultiple is a custom fucntion for Service Ordering for handling orderitems",
+									"tests[\"Response only contains chosen fields\"] = checkFieldsMultiple(fields,receivedData);",
+									"tests[\"Element contained equals previous creation\"] = filteredObjectEquals(lastRequest, receivedData);",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"//PREPARATION FOR FOLLOWING TESTS",
+									"",
+									"",
+									"//HELPING FUNCTIONS",
+									"/* testing for equality v2 may have more properties than v1 but not less */",
+									"function filteredObjectEquals(v1, v2) {",
+									"    if (v1 === undefined || v2 === undefined)",
+									"        return true;",
+									"    else if (typeof(v1) === \"function\") ",
+									"        return v1.toString() === v2.toString();",
+									"    else if (v1 instanceof Object && v2 instanceof Object) {",
+									"        var r = true;",
+									"        for (var k in v1) {",
+									"            r = filteredObjectEquals(v1[k], v2[k]);",
+									"            if (!r) ",
+									"                return false;",
+									"        }",
+									"        return true;",
+									"    }",
+									"    else return v1 === v2;",
+									"}",
+									"",
+									"function getPositionOfElementInList(elementId,list){",
+									"    for (var i = 0; i < list.length; i++){",
+									"        if (list[i].id == elementId)",
+									"            return i;",
+									"    }",
+									"    return -1;",
+									"}",
+									"",
+									"function findElementInList(elementId,list){",
+									"    for (var i = 0; i < list.length; i++){",
+									"        if (list[i].id == elementId)",
+									"            return true;",
+									"    }",
+									"    return false;",
+									"}",
+									"",
+									"function checkFields(fields,body){",
+									"    for (var key in body)",
+									"        if (fields.indexOf(key) < 0)",
+									"            return false;",
+									"    return true;",
+									"}",
+									"",
+									"function URLToArray(url) {",
+									"    var request = {};",
+									"    var pairs = url.substring(url.indexOf('?') + 1).split('&');",
+									"    for (var i = 0; i < pairs.length; i++) {",
+									"        if(!pairs[i])",
+									"            continue;",
+									"        var pair = pairs[i].split('=');",
+									"        request[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);",
+									"     }",
+									"     return request;",
+									"}",
+									"",
+									"function getUrlFromEnvironment(url){",
+									"    if (url.indexOf('{{') >= 0){",
+									"        part1 = url.substring(0,url.indexOf('{{'));",
+									"        part2 = url.substring(url.indexOf('{{')+2,url.indexOf('}}'));",
+									"        part3 = url.substring(url.indexOf('}}')+2,url.length);",
+									"        return getUrlFromEnvironment(part1) + getUrlFromEnvironment(environment[part2]) + getUrlFromEnvironment(part3);",
+									"    }",
+									"    else return url;",
+									"}",
+									"",
+									"function findFieldInBody(field,body){",
+									"    for (var key in body){",
+									"        /*if (key == \"orderItem\") {",
+									"            console.log(\"YO\");",
+									"            return findFieldsInBody(requiredOrderFields, key.orderItem)",
+									"        }",
+									"        else*/",
+									"        if (key == field)",
+									"            return true;",
+									"    }",
+									"    return false;",
+									"}",
+									"",
+									"function checkFieldsMultiple(fields,body){",
+									"    if (Object.prototype.toString.call(body) === '[object Array]'){",
+									"        for (var i = 0; i < body.length; i++){",
+									"            return checkFieldsMultiple(fields,body[i]);",
+									"        }",
+									"    }",
+									"    else for (var key in body) {",
+									"        if (key == \"orderItem\") {",
+									"            if (!checkFieldsMultiple(requiredOrderFields, body.orderItem)){",
+									"                console.log(JSON.stringify(body.orderItem))",
+									"                return false ",
+									"            }",
+									"        }",
+									"        else if (fields.indexOf(key) < 0)",
+									"            return false;",
+									"    }",
+									"",
+									"    return true;",
+									"}",
+									"",
+									"function findFieldsInBody(fields,body){",
+									"    if (Object.prototype.toString.call(body) === '[object Array]'){",
+									"        for (var i = 0; i < body.length; i++){",
+									"            findFieldsInBody(fields,body[i]);",
+									"        }",
+									"    }",
+									"    else for (var k = 0; k < fields.length; k++){",
+									"        if (!findFieldInBody(fields[k],body)){",
+									"            tests[\"An element is missing the field \" + fields[k]] = false;",
+									"            return false;",
+									"        }",
+									"    }",
+									"    return true;",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{serviceOrderingApi}}/serviceOrder?externalId=OrangeBSS748&fields=id,state,category,description",
+							"host": [
+								"{{serviceOrderingApi}}"
+							],
+							"path": [
+								"serviceOrder"
+							],
+							"query": [
+								{
+									"key": "externalId",
+									"value": "OrangeBSS748",
+									"equals": true
+								},
+								{
+									"key": "fields",
+									"value": "id,state,category,description",
+									"equals": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TC_ServiceOrder_E3 – Invalid Request – Missing parameter mandatory in context",
+			"description": null,
+			"item": [
+				{
+					"name": "serviceOrder/ 400",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "13ff6b81-f81e-4c36-9ace-b100f8b82ca6",
+								"type": "text/javascript",
+								"exec": [
+									"//TESTS",
+									"tests[\"Content-Type is present \" + postman.getResponseHeader(\"Content-type\")] = postman.getResponseHeader(\"Content-type\")",
+									"tests[\"Status code is an error\"] = responseCode.code >= 400;",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"externalId\": \"OrangeBSS566\",\n\"priority\": \"2\",\n\"description\": \"Service order description\",\n\"category\": \"CloudServiceOrdering\",\n\"requestedStartDate\": \"2018-01-18T09:37:40.508Z\",\n\"requestedCompletionDate\": \"2018-01-19T09:37:40.508Z\",\n\"@type\": \"standard\",\n\"orderItem\": [\n{\n\"id\": \"1\",\n\"action\": \"add\",\n\"@type\": \"standard\",\n\"service\": {\n\"serviceState\": \"Active\",\n\"serviceCharacteristic\": [\n{\n\"name\": \"vCPE_IP\",\n\"valueType\": \"String\",\n\"value\": {\n\"@type\": \"IPAddress\",\n\"@schemaLocation\": \"http....\",\n\"vCPE_IP\": \"193.218.459.78\"\n}\n}\n],\n\"serviceSpecification\": {\n\"name\": \"vCPE\",\n\"version\": \"1\",\n\"@type\": \"vCPE\",\n\"@schemaLocation\": \"http...\"\n}\n}\n}\n]\n}"
+						},
+						"url": {
+							"raw": "{{serviceOrderingApi}}/serviceOrder",
+							"host": [
+								"{{serviceOrderingApi}}"
+							],
+							"path": [
+								"serviceOrder"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TC_ServiceOrder_E2 – Invalid Request – unexpecting parameter",
+			"description": null,
+			"item": [
+				{
+					"name": "serviceOrder/ 400",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "13ff6b81-f81e-4c36-9ace-b100f8b82ca6",
+								"type": "text/javascript",
+								"exec": [
+									"//TESTS",
+									"tests[\"Content-Type is present \" + postman.getResponseHeader(\"Content-type\")] = postman.getResponseHeader(\"Content-type\")",
+									"tests[\"Status code is an error\"] = responseCode.code >= 400;",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"externalId\": \"OrangeBSS777\",\n\"priority\": \"1\",\n\"description\": \"Service order description\",\n\"category\": \"TMF resource illustration\",\n\"state\": \"acknowledged\",\n\"requestedStartDate\": \"2018-01-15T09:37:40.508Z\",\n\"requestedCompletionDate\": \"2018-01-15T09:37:40.508Z\",\n\"expectedCompletionDate\": \"2018-01-15T09:37:40.508Z\",\n\"@type\": \"standard\",\n\"notes\": {\n\"date\": \"2018-01-15T09:37:40.508Z\",\n\"author\": \"Jean Pontus\",\n\"text\": \"bla bla bla\"\n},\n\"relatedParty\": [\n{\n\"id\": \"456\",\n\"href\": \"http://serverlocation:port/partyManagement/party/456\",\n\"role\": \"requester\"\n}\n],\n\"orderItem\": [\n{\n\"id\": \"1\",\n\"action\": \"add\",\n\"state\": \"acknowledged\",\n\"@type\": \"standard\",\n\"service\": {\n\"serviceState\": \"Active\",\n\"serviceCharacteristic\": [\n{\n\"name\": \"vCPE_IP\",\n\"valueType\": \"String\",\n\"value\": {\n\"@type\": \"IPAddress\",\n\"@schemaLocation\": \"http....\",\n\"vCPE_IP\": \"193.218.236.21\"\n}\n}\n],\n\"serviceSpecification\": {\n\"id\": \"12\",\n\"href\": \"http://...:serviceSpecification/12\",\n\"name\": \"vCPE\",\n\"version\": \"1\",\n\"@type\": \"vCPE\",\n\"@schemaLocation\": \"http...\"\n}\n}\n}\n]\n}"
+						},
+						"url": {
+							"raw": "{{serviceOrderingApi}}/serviceOrder",
+							"host": [
+								"{{serviceOrderingApi}}"
+							],
+							"path": [
+								"serviceOrder"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TC_ServiceOrder_E1 – Unknown Trouble ServiceOrder identifier",
+			"description": null,
+			"item": [
+				{
+					"name": "serviceorder/{{id}} 404",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "2bc7de38-3cdf-4f37-904a-8e4899698070",
+								"type": "text/javascript",
+								"exec": [
+									"//TESTS",
+									"tests[\"Content-Type is present \" + postman.getResponseHeader(\"Content-type\")] = postman.getResponseHeader(\"Content-type\")",
+									"tests[\"Status code is 404\"] = responseCode.code === 404;"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{serviceOrderingApi}}/serviceOrder/123456",
+							"host": [
+								"{{serviceOrderingApi}}"
+							],
+							"path": [
+								"serviceOrder",
+								"123456"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

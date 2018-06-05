@@ -1,0 +1,6 @@
+applications:
+- name: serviceordering
+  host:
+  memory: 256M
+  services:
+    - tmf-compose-for-mongodb
